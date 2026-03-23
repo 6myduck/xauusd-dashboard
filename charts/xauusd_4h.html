@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>XAUUSD OANDA 4H</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2b;
+      --panel2: #172036;
+      --border: #27314a;
+      --grid: #2b364f;
+      --text: #e6edf8;
+      --muted: #96a3be;
+      --bull: #16c784;
+      --bear: #ea3943;
+      --accent: #60a5fa;
+      --warn: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: linear-gradient(180deg,#0b1020,#0d1326); color: var(--text); font: 14px/1.45 Inter, system-ui, sans-serif; }
+    .wrap { max-width: 1700px; margin: 0 auto; padding: 18px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 14px 40px rgba(0,0,0,.25); overflow: hidden; }
+    .head { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; padding: 18px 20px 10px; }
+    .title { font-size: 24px; font-weight: 800; }
+    .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .stats { display:flex; gap: 18px; flex-wrap: wrap; }
+    .stat { color: var(--muted); font-size: 12px; }
+    .stat b { display:block; color: var(--text); font-size: 15px; margin-top: 2px; }
+    .toolbar { display:flex; gap:10px; align-items:center; padding: 0 20px 10px; flex-wrap: wrap; }
+    .btn, .chip, .toggle {
+      border: 1px solid var(--border); background: var(--panel2); color: var(--text); padding: 8px 12px; border-radius: 12px;
+      cursor: pointer; font-size: 13px;
+    }
+    .btn:hover, .toggle:hover { filter: brightness(1.08); }
+    .chip { cursor: default; color: var(--muted); }
+    .toggle.active { background: #223250; border-color: #3a5a8a; color: #dbeafe; }
+    .layout { display:grid; grid-template-columns: minmax(0,1fr) 310px; gap: 12px; padding: 0 12px 12px; }
+    .chart-wrap { min-width: 0; }
+    .sidepanel { background: var(--panel2); border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
+    .panel-title { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
+    .kv { display:grid; grid-template-columns: 1fr; gap: 8px; }
+    .kv .row { background:#0f1728; border:1px solid #24314d; border-radius:12px; padding:10px; }
+    .kv .row b { display:block; font-size:11px; color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.05em; }
+    .hoverbox { margin-top: 12px; }
+    .hoverbox .big { font-size: 18px; font-weight: 800; }
+    canvas { width: 100%; height: auto; display:block; background: linear-gradient(180deg, #11182a 0%, #0f1423 100%); border-radius: 16px; border: 1px solid var(--border); }
+    .legend { display:flex; gap:14px; flex-wrap:wrap; padding: 0 20px 18px; color: var(--muted); font-size: 12px; }
+    .dot { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:middle; }
+    .hint { color: var(--muted); font-size: 12px; padding: 0 20px 20px; }
+    @media (max-width: 1200px) { .layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="head">
+        <div>
+          <div class="title">XAUUSD OANDA 4H</div>
+          <div class="sub">4H • 80 candles • 2026-03-04T02:00:00.000Z → 2026-03-23T05:00:00.000Z</div>
+        </div>
+        <div class="stats">
+          <div class="stat">Last<b id="stat-last">-</b></div>
+          <div class="stat">Visible High<b id="stat-high">-</b></div>
+          <div class="stat">Visible Low<b id="stat-low">-</b></div>
+          <div class="stat">Bias<b id="stat-bias">-</b></div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="btn" id="btn-reset">Reset view</button>
+        <button class="btn" id="btn-fit-y">Fit Y</button>
+        <button class="btn" id="btn-more">More candles</button>
+        <button class="btn" id="btn-less">Fewer candles</button>
+        <button class="toggle active" id="toggle-levels">Levels</button>
+        <button class="toggle active" id="toggle-zones">Zones</button>
+        <button class="toggle active" id="toggle-structure">Structure</button>
+        <button class="toggle active" id="toggle-liquidity">Liquidity</button>
+        <span class="chip">Scroll chart = zoom ngang</span>
+        <span class="chip">Scroll trục giá phải = zoom dọc</span>
+        <span class="chip">Drag = pan ngang</span>
+      </div>
+      <div class="layout">
+        <div class="chart-wrap"><canvas id="chart" width="1600" height="980"></canvas></div>
+        <aside class="sidepanel">
+          <div class="panel-title">Live Info</div>
+          <div class="kv">
+            <div class="row"><b>Bias / Regime</b><span id="side-bias">-</span></div>
+            <div class="row"><b>Trend / Mode</b><span id="side-trend">-</span></div>
+            <div class="row"><b>Visible Range</b><span id="side-range">-</span></div>
+            <div class="row"><b>Near / Major S-R</b><span id="side-levels">-</span></div>
+            <div class="row"><b>Best Setup</b><span id="side-setup">-</span></div>
+          </div>
+          <div class="hoverbox">
+            <div class="panel-title">Hover Candle</div>
+            <div class="kv">
+              <div class="row"><b>Time</b><span id="hover-time">-</span></div>
+              <div class="row"><b>OHLC</b><span id="hover-ohlc">-</span></div>
+              <div class="row"><b>Volume</b><span id="hover-volume">-</span></div>
+              <div class="row"><b>Cursor Price</b><span class="big" id="hover-price">-</span></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+      <div class="legend">
+        <span><span class="dot" style="background:#16c784"></span>Bull candle</span>
+        <span><span class="dot" style="background:#ea3943"></span>Bear candle</span>
+        <span><span class="dot" style="background:#60a5fa"></span>Trendline / structure</span>
+        <span><span class="dot" style="background:#22c55e"></span>Support / long zone</span>
+        <span><span class="dot" style="background:#ef4444"></span>Resistance / short zone</span>
+        <span><span class="dot" style="background:#f59e0b"></span>Range / equal highs-lows</span>
+      </div>
+      <div class="hint">Interactive chart: mouse wheel on candle area zooms horizontally; mouse wheel on the price axis at right zooms vertically. Drag chart left/right to pan. Double-click resets view.</div>
+    </div>
+  </div>
+  <script>
+    const DATA = {"title":"XAUUSD OANDA 4H","intervalLabel":"4H","showVolume":true,"bars":[{"index":2420,"timestamp":1772589600,"isoTime":"2026-03-04T02:00:00.000Z","open":5175.075,"high":5191.065,"low":5141.14,"close":5160.09,"volume":200568},{"index":2421,"timestamp":1772604000,"isoTime":"2026-03-04T06:00:00.000Z","open":5160.095,"high":5185.4,"low":5117.72,"close":5182.51,"volume":173862},{"index":2422,"timestamp":1772618400,"isoTime":"2026-03-04T10:00:00.000Z","open":5182.53,"high":5206.265,"low":5156.51,"close":5167.965,"volume":190166},{"index":2423,"timestamp":1772632800,"isoTime":"2026-03-04T14:00:00.000Z","open":5167.99,"high":5185.33,"low":5120.285,"close":5141.285,"volume":360246},{"index":2424,"timestamp":1772647200,"isoTime":"2026-03-04T18:00:00.000Z","open":5141.23,"high":5146.945,"low":5108.64,"close":5140.945,"volume":153781},{"index":2425,"timestamp":1772661600,"isoTime":"2026-03-04T22:00:00.000Z","open":5152.485,"high":5186.575,"low":5144.86,"close":5172.85,"volume":83813},{"index":2426,"timestamp":1772676000,"isoTime":"2026-03-05T02:00:00.000Z","open":5172.8,"high":5195.22,"low":5148.41,"close":5148.755,"volume":106369},{"index":2427,"timestamp":1772690400,"isoTime":"2026-03-05T06:00:00.000Z","open":5148.755,"high":5180.48,"low":5120.785,"close":5161.26,"volume":189705},{"index":2428,"timestamp":1772704800,"isoTime":"2026-03-05T10:00:00.000Z","open":5161.255,"high":5171.54,"low":5081.23,"close":5118.085,"volume":167254},{"index":2429,"timestamp":1772719200,"isoTime":"2026-03-05T14:00:00.000Z","open":5118.09,"high":5130.005,"low":5054.22,"close":5062.87,"volume":424820},{"index":2430,"timestamp":1772733600,"isoTime":"2026-03-05T18:00:00.000Z","open":5062.75,"high":5094.925,"low":5050.905,"close":5081.38,"volume":268809},{"index":2431,"timestamp":1772748000,"isoTime":"2026-03-05T22:00:00.000Z","open":5090.81,"high":5144.05,"low":5066.4,"close":5134.575,"volume":110670},{"index":2432,"timestamp":1772762400,"isoTime":"2026-03-06T02:00:00.000Z","open":5134.44,"high":5141.64,"low":5114.23,"close":5117.63,"volume":101699},{"index":2433,"timestamp":1772776800,"isoTime":"2026-03-06T06:00:00.000Z","open":5117.595,"high":5123.16,"low":5083.33,"close":5085.715,"volume":128837},{"index":2434,"timestamp":1772791200,"isoTime":"2026-03-06T10:00:00.000Z","open":5085.77,"high":5131.245,"low":5063.215,"close":5085.12,"volume":232886},{"index":2435,"timestamp":1772805600,"isoTime":"2026-03-06T14:00:00.000Z","open":5085.17,"high":5171.89,"low":5080.905,"close":5141.01,"volume":412644},{"index":2436,"timestamp":1772820000,"isoTime":"2026-03-06T18:00:00.000Z","open":5141.015,"high":5176.63,"low":5138.88,"close":5171.5,"volume":174681},{"index":2437,"timestamp":1773003600,"isoTime":"2026-03-08T21:00:00.000Z","open":5171.95,"high":5171.95,"low":5028.54,"close":5050.03,"volume":216231},{"index":2438,"timestamp":1773018000,"isoTime":"2026-03-09T01:00:00.000Z","open":5049.625,"high":5102.255,"low":5015.045,"close":5090.36,"volume":244796},{"index":2439,"timestamp":1773032400,"isoTime":"2026-03-09T05:00:00.000Z","open":5090.35,"high":5140.79,"low":5081.185,"close":5096.725,"volume":217445},{"index":2440,"timestamp":1773046800,"isoTime":"2026-03-09T09:00:00.000Z","open":5096.71,"high":5132.765,"low":5079.93,"close":5095.07,"volume":194900},{"index":2441,"timestamp":1773061200,"isoTime":"2026-03-09T13:00:00.000Z","open":5095.075,"high":5116.28,"low":5060.595,"close":5104.74,"volume":352244},{"index":2442,"timestamp":1773075600,"isoTime":"2026-03-09T17:00:00.000Z","open":5104.76,"high":5148.205,"low":5089.135,"close":5137.91,"volume":168491},{"index":2443,"timestamp":1773090000,"isoTime":"2026-03-09T21:00:00.000Z","open":5128.805,"high":5156.21,"low":5117.355,"close":5131.225,"volume":85307},{"index":2444,"timestamp":1773104400,"isoTime":"2026-03-10T01:00:00.000Z","open":5131.155,"high":5187.055,"low":5124.835,"close":5163.845,"volume":156353},{"index":2445,"timestamp":1773118800,"isoTime":"2026-03-10T05:00:00.000Z","open":5163.84,"high":5195.405,"low":5158.395,"close":5183.48,"volume":93587},{"index":2446,"timestamp":1773133200,"isoTime":"2026-03-10T09:00:00.000Z","open":5183.58,"high":5192.045,"low":5156.5,"close":5187.085,"volume":146983},{"index":2447,"timestamp":1773147600,"isoTime":"2026-03-10T13:00:00.000Z","open":5187.01,"high":5238.775,"low":5185.3,"close":5227.58,"volume":159633},{"index":2448,"timestamp":1773162000,"isoTime":"2026-03-10T17:00:00.000Z","open":5227.585,"high":5235.55,"low":5160.65,"close":5192.51,"volume":191246},{"index":2449,"timestamp":1773176400,"isoTime":"2026-03-10T21:00:00.000Z","open":5191.79,"high":5219.59,"low":5183.47,"close":5215.455,"volume":45317},{"index":2450,"timestamp":1773190800,"isoTime":"2026-03-11T01:00:00.000Z","open":5215.45,"high":5223.385,"low":5194.02,"close":5204.61,"volume":83803},{"index":2451,"timestamp":1773205200,"isoTime":"2026-03-11T05:00:00.000Z","open":5204.4,"high":5210.97,"low":5175.35,"close":5187.695,"volume":88731},{"index":2452,"timestamp":1773219600,"isoTime":"2026-03-11T09:00:00.000Z","open":5187.67,"high":5197.175,"low":5166.835,"close":5167.53,"volume":84685},{"index":2453,"timestamp":1773234000,"isoTime":"2026-03-11T13:00:00.000Z","open":5167.48,"high":5196.315,"low":5149.155,"close":5175.77,"volume":213638},{"index":2454,"timestamp":1773248400,"isoTime":"2026-03-11T17:00:00.000Z","open":5175.84,"high":5183.76,"low":5154.985,"close":5176.48,"volume":113863},{"index":2455,"timestamp":1773262800,"isoTime":"2026-03-11T21:00:00.000Z","open":5178.045,"high":5178.32,"low":5125.64,"close":5153.205,"volume":92508},{"index":2456,"timestamp":1773277200,"isoTime":"2026-03-12T01:00:00.000Z","open":5153.2,"high":5175.15,"low":5140.62,"close":5142.7,"volume":130350},{"index":2457,"timestamp":1773291600,"isoTime":"2026-03-12T05:00:00.000Z","open":5142.76,"high":5189.86,"low":5137.17,"close":5178.22,"volume":84123},{"index":2458,"timestamp":1773306000,"isoTime":"2026-03-12T09:00:00.000Z","open":5178.205,"high":5191.79,"low":5163.685,"close":5181.625,"volume":89653},{"index":2459,"timestamp":1773320400,"isoTime":"2026-03-12T13:00:00.000Z","open":5181.575,"high":5186.145,"low":5109.85,"close":5123.55,"volume":218527},{"index":2460,"timestamp":1773334800,"isoTime":"2026-03-12T17:00:00.000Z","open":5123.495,"high":5129.87,"low":5055.125,"close":5079.255,"volume":189368},{"index":2461,"timestamp":1773349200,"isoTime":"2026-03-12T21:00:00.000Z","open":5083.865,"high":5115.4,"low":5077.79,"close":5113.78,"volume":43037},{"index":2462,"timestamp":1773363600,"isoTime":"2026-03-13T01:00:00.000Z","open":5113.95,"high":5128.475,"low":5102.825,"close":5104.59,"volume":78444},{"index":2463,"timestamp":1773378000,"isoTime":"2026-03-13T05:00:00.000Z","open":5104.82,"high":5111.26,"low":5061.72,"close":5087.55,"volume":106265},{"index":2464,"timestamp":1773392400,"isoTime":"2026-03-13T09:00:00.000Z","open":5087.485,"high":5122.01,"low":5079.94,"close":5118.3,"volume":73151},{"index":2465,"timestamp":1773406800,"isoTime":"2026-03-13T13:00:00.000Z","open":5118.335,"high":5121.265,"low":5019.2,"close":5046.045,"volume":221291},{"index":2466,"timestamp":1773421200,"isoTime":"2026-03-13T17:00:00.000Z","open":5045.955,"high":5064.08,"low":5009.745,"close":5020.6,"volume":172936},{"index":2467,"timestamp":1773608400,"isoTime":"2026-03-15T21:00:00.000Z","open":5014.955,"high":5031.005,"low":4967.775,"close":5026.005,"volume":124679},{"index":2468,"timestamp":1773622800,"isoTime":"2026-03-16T01:00:00.000Z","open":5026.02,"high":5026.66,"low":4982.675,"close":5013.05,"volume":156361},{"index":2469,"timestamp":1773637200,"isoTime":"2026-03-16T05:00:00.000Z","open":5013.045,"high":5036.01,"low":4985.115,"close":4991.305,"volume":120301},{"index":2470,"timestamp":1773651600,"isoTime":"2026-03-16T09:00:00.000Z","open":4991.135,"high":5025.585,"low":4970.23,"close":5020.06,"volume":120491},{"index":2471,"timestamp":1773666000,"isoTime":"2026-03-16T13:00:00.000Z","open":5020.055,"high":5038.145,"low":4974.235,"close":4990.74,"volume":197783},{"index":2472,"timestamp":1773680400,"isoTime":"2026-03-16T17:00:00.000Z","open":4990.78,"high":5021.835,"low":4984.015,"close":5006.565,"volume":146360},{"index":2473,"timestamp":1773694800,"isoTime":"2026-03-16T21:00:00.000Z","open":5011.11,"high":5016.185,"low":4998.29,"close":5003.03,"volume":60075},{"index":2474,"timestamp":1773709200,"isoTime":"2026-03-17T01:00:00.000Z","open":5002.91,"high":5042.185,"low":4994.935,"close":5038.05,"volume":114574},{"index":2475,"timestamp":1773723600,"isoTime":"2026-03-17T05:00:00.000Z","open":5038.045,"high":5044.9,"low":5005.04,"close":5024.95,"volume":113986},{"index":2476,"timestamp":1773738000,"isoTime":"2026-03-17T09:00:00.000Z","open":5024.905,"high":5026.055,"low":4992.06,"close":5011.905,"volume":88693},{"index":2477,"timestamp":1773752400,"isoTime":"2026-03-17T13:00:00.000Z","open":5011.9,"high":5031.59,"low":4973.72,"close":5002.06,"volume":184955},{"index":2478,"timestamp":1773766800,"isoTime":"2026-03-17T17:00:00.000Z","open":5002.05,"high":5009.21,"low":4996.445,"close":5005.725,"volume":102818},{"index":2479,"timestamp":1773781200,"isoTime":"2026-03-17T21:00:00.000Z","open":5001.96,"high":5012.24,"low":4993.39,"close":5004.32,"volume":28386},{"index":2480,"timestamp":1773795600,"isoTime":"2026-03-18T01:00:00.000Z","open":5004.3,"high":5016.29,"low":4981.83,"close":4987.2,"volume":107571},{"index":2481,"timestamp":1773810000,"isoTime":"2026-03-18T05:00:00.000Z","open":4987.17,"high":5016.53,"low":4977.455,"close":4987.645,"volume":97733},{"index":2482,"timestamp":1773824400,"isoTime":"2026-03-18T09:00:00.000Z","open":4987.645,"high":4995.85,"low":4870.87,"close":4881.815,"volume":178376},{"index":2483,"timestamp":1773838800,"isoTime":"2026-03-18T13:00:00.000Z","open":4881.78,"high":4894.67,"low":4834.38,"close":4886.95,"volume":274460},{"index":2484,"timestamp":1773853200,"isoTime":"2026-03-18T17:00:00.000Z","open":4887,"high":4899.46,"low":4806.845,"close":4818.415,"volume":222205},{"index":2485,"timestamp":1773867600,"isoTime":"2026-03-18T21:00:00.000Z","open":4824.645,"high":4848.87,"low":4804.225,"close":4841.38,"volume":90622},{"index":2486,"timestamp":1773882000,"isoTime":"2026-03-19T01:00:00.000Z","open":4841.385,"high":4867.225,"low":4832.995,"close":4849.87,"volume":140277},{"index":2487,"timestamp":1773896400,"isoTime":"2026-03-19T05:00:00.000Z","open":4849.86,"high":4853.885,"low":4686.885,"close":4709.635,"volume":260761},{"index":2488,"timestamp":1773910800,"isoTime":"2026-03-19T09:00:00.000Z","open":4709.64,"high":4726.02,"low":4531.275,"close":4574.815,"volume":360079},{"index":2489,"timestamp":1773925200,"isoTime":"2026-03-19T13:00:00.000Z","open":4574.745,"high":4649.31,"low":4502.365,"close":4584.95,"volume":588903},{"index":2490,"timestamp":1773939600,"isoTime":"2026-03-19T17:00:00.000Z","open":4584.94,"high":4663.63,"low":4573.915,"close":4650.72,"volume":337277},{"index":2491,"timestamp":1773954000,"isoTime":"2026-03-19T21:00:00.000Z","open":4659.99,"high":4677.205,"low":4634.355,"close":4648.745,"volume":87801},{"index":2492,"timestamp":1773968400,"isoTime":"2026-03-20T01:00:00.000Z","open":4648.74,"high":4736.175,"low":4639.42,"close":4721.82,"volume":184623},{"index":2493,"timestamp":1773982800,"isoTime":"2026-03-20T05:00:00.000Z","open":4721.845,"high":4734.96,"low":4661.305,"close":4693.85,"volume":165174},{"index":2494,"timestamp":1773997200,"isoTime":"2026-03-20T09:00:00.000Z","open":4693.855,"high":4700.65,"low":4637.245,"close":4678.445,"volume":215424},{"index":2495,"timestamp":1774011600,"isoTime":"2026-03-20T13:00:00.000Z","open":4678.42,"high":4679.615,"low":4540.785,"close":4583.105,"volume":501456},{"index":2496,"timestamp":1774026000,"isoTime":"2026-03-20T17:00:00.000Z","open":4583.155,"high":4600.885,"low":4477.54,"close":4497.48,"volume":383744},{"index":2497,"timestamp":1774213200,"isoTime":"2026-03-22T21:00:00.000Z","open":4472.24,"high":4536.415,"low":4319.92,"close":4354.325,"volume":210850},{"index":2498,"timestamp":1774227600,"isoTime":"2026-03-23T01:00:00.000Z","open":4354.13,"high":4454.51,"low":4330.325,"close":4367.97,"volume":427569},{"index":2499,"timestamp":1774242000,"isoTime":"2026-03-23T05:00:00.000Z","open":4367.92,"high":4380.155,"low":4163.07,"close":4223.2,"volume":232013}],"analysis":{"meta":{"symbol":"OANDA:XAUUSD","source":"TradingView websocket","fetchedAt":"2026-03-23T06:54:43.915Z"},"trend4h":{"trend":"giảm","confidence":0.8233745652823077,"swings":[{"kind":"high","index":0,"price":5011.905,"timestamp":1773738000,"isoTime":"2026-03-17T09:00:00.000Z"},{"kind":"low","index":12,"price":4531.275,"timestamp":1773910800,"isoTime":"2026-03-19T09:00:00.000Z"},{"kind":"high","index":16,"price":4736.175,"timestamp":1773968400,"isoTime":"2026-03-20T01:00:00.000Z"},{"kind":"low","index":23,"price":4163.07,"timestamp":1774242000,"isoTime":"2026-03-23T05:00:00.000Z"}],"threshold":94.90560000000005,"atr":118.63200000000006,"structure":{"structure":"bearish","bos":null,"choch":null,"lastHigh":4736.175,"prevHigh":5011.905,"lastLow":4163.07,"prevLow":4531.275}},"regime":{"regime":"volatile","efficiency":0.5887748117727557,"m5Atr":31.922499999999854,"h1Atr":79.10400000000008,"m5Range":219.15000000000055,"h1Range":532.6350000000002},"intraday":{"bias":"sell_rally","volumeState":"active","session":{"session":"london","hourUtc":6},"h1Structure":{"structure":"range","bos":null,"choch":null,"lastHigh":4678.445,"lastLow":4163.07},"m5Structure":{"structure":"bearish","bos":null,"choch":null,"lastHigh":4230.11,"prevHigh":4296.21,"lastLow":4182.435,"prevLow":4270.06},"lastPrice":4221.495,"avgVolume5m":8145.111111111111,"lastVolume5m":12841,"intradayHigh":4382.22,"intradayLow":4163.07,"distanceToSupport":39.05999999999949,"distanceToResistance":8.614999999999782},"structure5m":{"mode":"swing","box":{"high":4380.155,"low":4163.07,"range":217.08500000000004,"rangePct":5.047016814574123,"touchesTop":4,"touchesBottom":1},"note":"5m đang vận động định hướng, ưu tiên theo intraday swing/trend."},"levels":{"currentPrice":4221.495,"supportNear":4182.435,"resistanceNear":4230.11,"supportMajor":4163.07,"resistanceMajor":4531.275,"h4RangeLow":4163.07,"h4RangeHigh":4736.175,"h1RangeLow":4163.07,"h1RangeHigh":4695.705,"m5RangeLow":4163.07,"m5RangeHigh":4382.22,"h1Swings":[{"kind":"high","index":0,"price":4678.445,"timestamp":1774008000,"isoTime":"2026-03-20T12:00:00.000Z"},{"kind":"low","index":17,"price":4163.07,"timestamp":1774245600,"isoTime":"2026-03-23T06:00:00.000Z"}],"m5Swings":[{"kind":"low","index":0,"price":4352.99,"timestamp":1774238100,"isoTime":"2026-03-23T03:55:00.000Z"},{"kind":"high","index":9,"price":4378.29,"timestamp":1774240800,"isoTime":"2026-03-23T04:40:00.000Z"},{"kind":"low","index":11,"price":4349.91,"timestamp":1774241400,"isoTime":"2026-03-23T04:50:00.000Z"},{"kind":"high","index":14,"price":4379.57,"timestamp":1774242300,"isoTime":"2026-03-23T05:05:00.000Z"},{"kind":"low","index":26,"price":4270.06,"timestamp":1774245900,"isoTime":"2026-03-23T06:05:00.000Z"},{"kind":"high","index":27,"price":4296.21,"timestamp":1774246200,"isoTime":"2026-03-23T06:10:00.000Z"},{"kind":"low","index":33,"price":4182.435,"timestamp":1774248000,"isoTime":"2026-03-23T06:40:00.000Z"},{"kind":"high","index":35,"price":4230.11,"timestamp":1774248600,"isoTime":"2026-03-23T06:50:00.000Z"}]},"liquidity":{"highVolumePrices":[4277.276666666668,4291.428333333333,4255.251666666666,4236.59,4231.171666666666,4203.131666666667,4192.096666666667,4218.489999999999],"dayReactionLow":4163.07,"dayReactionHigh":4382.22,"h1Low":4163.07,"h1High":4695.705,"buyLiquidity":[4163.07,4163.07,4182.435],"sellLiquidity":[4230.11,4382.22,4531.275],"equalHighs":[[4378.29,4379.57]],"equalLows":[],"sweeps":[{"type":"buy_side_sweep","level":4296.21,"at":"2026-03-23T06:00:00.000Z","close":4286.4},{"type":"buy_side_sweep","level":4296.21,"at":"2026-03-23T06:15:00.000Z","close":4285.955},{"type":"buy_side_sweep","level":4230.11,"at":"2026-03-23T06:40:00.000Z","close":4182.97},{"type":"sell_side_sweep","level":4182.435,"at":"2026-03-23T06:45:00.000Z","close":4206.595}]},"plans":[{"side":"short","style":"intraday","zone":[4230.11,4531.275],"invalidation":4553.620749999999,"target1":4182.435,"target2":4163.07,"note":"Canh sell khi giá hồi vào kháng cự gần, ưu tiên sau false break / rejection / buy-side sweep.","score":100}],"limitations":["Volume từ OANDA/TradingView là activity proxy, không phải futures centralized volume.","BOS/CHoCH, equal highs/lows, liquidity sweeps và Darvas là rule-based engine, không phải order-flow thực."]},"meta":{"symbol":"OANDA:XAUUSD","fetchedAt":"2026-03-23T06:54:45.656Z"}};
+
+    const canvas = document.getElementById('chart');
+    const ctx = canvas.getContext('2d');
+    const DPR = Math.max(1, window.devicePixelRatio || 1);
+    const CSS_WIDTH = 1600;
+    const CSS_HEIGHT = 980;
+    canvas.width = CSS_WIDTH * DPR;
+    canvas.height = CSS_HEIGHT * DPR;
+    ctx.scale(DPR, DPR);
+
+    const M = { top: 56, right: 118, bottom: 86, left: 66 };
+    const PLOT_W = CSS_WIDTH - M.left - M.right;
+    const VOLUME_H = DATA.showVolume ? 160 : 0;
+    const GAP = DATA.showVolume ? 22 : 0;
+    const PLOT_H = CSS_HEIGHT - M.top - M.bottom - VOLUME_H - GAP;
+    const PRICE_AXIS_X = CSS_WIDTH - M.right;
+
+    const state = {
+      start: Math.max(0, DATA.bars.length - Math.min(DATA.bars.length, 120)),
+      count: Math.min(DATA.bars.length, 120),
+      yMin: null,
+      yMax: null,
+      dragging: false,
+      dragX: 0,
+      dragStart: 0,
+      hoverX: null,
+      hoverY: null,
+      showCrosshair: false,
+      layers: {
+        levels: true,
+        zones: true,
+        structure: true,
+        liquidity: true,
+      },
+    };
+
+    function fmt(n, d = 2) { return Number.isFinite(n) ? n.toFixed(d) : 'n/a'; }
+    function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+    function visibleBars() { return DATA.bars.slice(state.start, state.start + state.count); }
+    function visibleRange() {
+      const bars = visibleBars();
+      let low = Infinity, high = -Infinity, vol = 1;
+      for (const b of bars) {
+        if (b.low < low) low = b.low;
+        if (b.high > high) high = b.high;
+        vol = Math.max(vol, b.volume || 0);
+      }
+      const pad = (high - low) * 0.07 || 1;
+      return { low: low - pad, high: high + pad, volMax: vol };
+    }
+    function ensureYRange() {
+      const vr = visibleRange();
+      if (state.yMin == null || state.yMax == null) {
+        state.yMin = vr.low;
+        state.yMax = vr.high;
+      }
+    }
+    function fitY() {
+      const vr = visibleRange();
+      state.yMin = vr.low;
+      state.yMax = vr.high;
+    }
+    function xForIndex(localIndex) { return M.left + (localIndex + 0.5) * (PLOT_W / state.count); }
+    function yForPrice(price) { return M.top + ((state.yMax - price) / (state.yMax - state.yMin)) * PLOT_H; }
+    function yForVolume(v, volMax) { return M.top + PLOT_H + GAP + (VOLUME_H - (v / volMax) * VOLUME_H); }
+    function isInPriceAxis(x, y) { return x >= PRICE_AXIS_X && x <= CSS_WIDTH && y >= M.top && y <= M.top + PLOT_H; }
+    function isInPlot(x, y) { return x >= M.left && x < PRICE_AXIS_X && y >= M.top && y <= M.top + PLOT_H; }
+    function updateStats() {
+      const bars = visibleBars();
+      const high = Math.max(...bars.map(b => b.high));
+      const low = Math.min(...bars.map(b => b.low));
+      const last = bars[bars.length - 1];
+      document.getElementById('stat-last').textContent = fmt(last.close);
+      document.getElementById('stat-high').textContent = fmt(high);
+      document.getElementById('stat-low').textContent = fmt(low);
+      document.getElementById('stat-bias').textContent = DATA.analysis?.intraday?.bias || 'n/a';
+      document.getElementById('side-bias').textContent = (DATA.analysis?.intraday?.bias || 'n/a') + ' / ' + (DATA.analysis?.regime?.regime || 'n/a');
+      document.getElementById('side-trend').textContent = (DATA.analysis?.trend4h?.trend || 'n/a') + ' / ' + (DATA.analysis?.structure5m?.mode || 'n/a');
+      document.getElementById('side-range').textContent = fmt(low) + ' - ' + fmt(high) + ' (' + fmt(high - low) + ')';
+      document.getElementById('side-levels').textContent = 'Near ' + fmt(DATA.analysis?.levels?.supportNear) + ' / ' + fmt(DATA.analysis?.levels?.resistanceNear) + ' • Major ' + fmt(DATA.analysis?.levels?.supportMajor) + ' / ' + fmt(DATA.analysis?.levels?.resistanceMajor);
+      document.getElementById('side-setup').textContent = ((DATA.analysis?.plans?.[0]?.side || 'n/a').toUpperCase()) + ' (' + (DATA.analysis?.plans?.[0]?.score ?? 'n/a') + '/100)';
+    }
+
+    function drawGrid() {
+      ctx.strokeStyle = '#2b364f';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#96a3be';
+      ctx.font = '11px Inter, sans-serif';
+      for (let i = 0; i <= 8; i++) {
+        const y = M.top + (PLOT_H / 8) * i;
+        const price = state.yMax - ((state.yMax - state.yMin) * i / 8);
+        ctx.beginPath(); ctx.moveTo(M.left, y); ctx.lineTo(PRICE_AXIS_X, y); ctx.stroke();
+        ctx.fillText(fmt(price), PRICE_AXIS_X + 8, y + 4);
+      }
+      const bars = visibleBars();
+      const step = Math.max(1, Math.floor(bars.length / 8));
+      for (let i = 0; i < bars.length; i += step) {
+        const x = xForIndex(i);
+        ctx.globalAlpha = 0.35;
+        ctx.beginPath(); ctx.moveTo(x, M.top); ctx.lineTo(x, M.top + PLOT_H); ctx.stroke();
+        ctx.globalAlpha = 1;
+        const txt = new Date(bars[i].isoTime).toISOString().slice(5,16).replace('T', ' ');
+        ctx.fillText(txt, x - 28, CSS_HEIGHT - 24);
+      }
+      if (DATA.showVolume) {
+        ctx.beginPath(); ctx.moveTo(M.left, M.top + PLOT_H + GAP); ctx.lineTo(PRICE_AXIS_X, M.top + PLOT_H + GAP); ctx.stroke();
+      }
+    }
+
+    function drawCandles() {
+      const bars = visibleBars();
+      const slot = PLOT_W / state.count;
+      const bodyW = Math.max(3, slot * 0.72);
+      const volMax = visibleRange().volMax;
+      bars.forEach((b, i) => {
+        const x = xForIndex(i);
+        const yO = yForPrice(b.open), yC = yForPrice(b.close), yH = yForPrice(b.high), yL = yForPrice(b.low);
+        const color = b.close >= b.open ? '#16c784' : '#ea3943';
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(x, yH); ctx.lineTo(x, yL); ctx.stroke();
+        const top = Math.min(yO, yC);
+        const h = Math.max(1.5, Math.abs(yC - yO));
+        ctx.globalAlpha = 0.95;
+        roundRect(ctx, x - bodyW / 2, top, bodyW, h, 1.5, true, false);
+        ctx.globalAlpha = 1;
+        if (DATA.showVolume) {
+          const yV = yForVolume(b.volume || 0, volMax);
+          ctx.globalAlpha = 0.35;
+          roundRect(ctx, x - bodyW / 2, yV, bodyW, M.top + PLOT_H + GAP + VOLUME_H - yV, 1.5, true, false);
+          ctx.globalAlpha = 1;
+        }
+      });
+    }
+
+    function localIndexForTimestamp(ts) {
+      const bars = visibleBars();
+      return bars.findIndex(b => b.timestamp === ts);
+    }
+
+    function lineY(price) { return Number.isFinite(price) ? yForPrice(price) : null; }
+
+    function drawOverlay() {
+      const a = DATA.analysis;
+      if (!a) return;
+      if (state.layers.levels) {
+        const lines = [
+          { label: 'Near Support', value: a.levels?.supportNear, color: '#22c55e', dash: [5,4] },
+          { label: 'Near Resistance', value: a.levels?.resistanceNear, color: '#ef4444', dash: [5,4] },
+          { label: 'Major Support', value: a.levels?.supportMajor, color: '#10b981', dash: [10,4] },
+          { label: 'Major Resistance', value: a.levels?.resistanceMajor, color: '#f97316', dash: [10,4] },
+        ].filter(x => Number.isFinite(x.value));
+        lines.forEach((line, idx) => {
+          const y = lineY(line.value);
+          ctx.save();
+          ctx.setLineDash(line.dash);
+          ctx.strokeStyle = line.color;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(M.left, y); ctx.lineTo(PRICE_AXIS_X, y); ctx.stroke();
+          ctx.restore();
+          drawLabel(M.left + 8, y + (idx % 2 ? -8 : 14), line.label + ': ' + fmt(line.value), line.color, '#0f172a');
+        });
+      }
+
+      const plan = a.plans?.[0];
+      if (state.layers.zones && plan?.zone?.length === 2) {
+        const low = Math.min(plan.zone[0], plan.zone[1]);
+        const high = Math.max(plan.zone[0], plan.zone[1]);
+        const y1 = yForPrice(high), y2 = yForPrice(low);
+        const fill = plan.side === 'long' ? 'rgba(34,197,94,0.12)' : plan.side === 'short' ? 'rgba(239,68,68,0.12)' : 'rgba(96,165,250,0.12)';
+        const stroke = plan.side === 'long' ? '#22c55e' : plan.side === 'short' ? '#ef4444' : '#60a5fa';
+        ctx.fillStyle = fill; ctx.strokeStyle = stroke; ctx.lineWidth = 1.1;
+        roundRect(ctx, M.left, Math.min(y1,y2), PLOT_W, Math.abs(y2-y1), 4, true, true);
+        drawLabel(M.left + 10, Math.min(y1,y2) + 16, 'Best setup zone (' + plan.side.toUpperCase() + ')', stroke, '#0f172a');
+        [['Invalidation', plan?.invalidation, '#fb7185'], ['TP1', plan?.target1, '#c4b5fd'], ['TP2', plan?.target2, '#a78bfa']].forEach(([name, value, color], i) => {
+          if (!Number.isFinite(value)) return;
+          const y = yForPrice(value);
+          ctx.save(); ctx.setLineDash([5,4]); ctx.strokeStyle = color; ctx.lineWidth = 1.1;
+          ctx.beginPath(); ctx.moveTo(M.left, y); ctx.lineTo(PRICE_AXIS_X, y); ctx.stroke(); ctx.restore();
+          drawLabel(PRICE_AXIS_X - 130, y - 7 - i * 0, name + ' ' + fmt(value), color, '#0f172a');
+        });
+      }
+
+      if (state.layers.zones && (a.structure5m?.mode === 'darvas' || a.structure5m?.mode === 'sideway')) {
+        const hi = a.structure5m?.box?.high, lo = a.structure5m?.box?.low;
+        if (Number.isFinite(hi) && Number.isFinite(lo)) {
+          const y1 = yForPrice(hi), y2 = yForPrice(lo);
+          ctx.save(); ctx.setLineDash([8,4]); ctx.fillStyle = 'rgba(245,158,11,0.08)'; ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 1.1;
+          roundRect(ctx, M.left, Math.min(y1,y2), PLOT_W, Math.abs(y2-y1), 4, true, true); ctx.restore();
+          drawLabel(M.left + 10, Math.min(y1,y2) + 34, 'Darvas / range box', '#fbbf24', '#0f172a');
+        }
+      }
+
+      if (state.layers.structure) {
+        const swings = a.levels?.m5Swings || [];
+        const pts = swings.map(sw => {
+          const idx = localIndexForTimestamp(sw.timestamp);
+          if (idx < 0) return null;
+          return { x: xForIndex(idx), y: yForPrice(sw.price), kind: sw.kind, price: sw.price };
+        }).filter(Boolean);
+        ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.5;
+        for (let i = 1; i < pts.length; i++) {
+          ctx.beginPath(); ctx.moveTo(pts[i-1].x, pts[i-1].y); ctx.lineTo(pts[i].x, pts[i].y); ctx.stroke();
+        }
+        pts.forEach(p => {
+          ctx.fillStyle = p.kind === 'high' ? '#f97316' : '#22c55e';
+          ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
+          drawTinyText(p.x + 7, p.y - 7, (p.kind === 'high' ? 'H' : 'L') + ' ' + fmt(p.price), p.kind === 'high' ? '#fdba74' : '#86efac');
+        });
+      }
+
+      if (state.layers.liquidity) {
+        for (const pair of a.liquidity?.equalHighs || []) {
+          const y = yForPrice((pair[0] + pair[1]) / 2);
+          ctx.save(); ctx.setLineDash([2,8]); ctx.strokeStyle = '#f59e0b'; ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.moveTo(M.left, y); ctx.lineTo(PRICE_AXIS_X, y); ctx.stroke(); ctx.restore(); ctx.globalAlpha = 1;
+        }
+        for (const pair of a.liquidity?.equalLows || []) {
+          const y = yForPrice((pair[0] + pair[1]) / 2);
+          ctx.save(); ctx.setLineDash([2,8]); ctx.strokeStyle = '#10b981'; ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.moveTo(M.left, y); ctx.lineTo(PRICE_AXIS_X, y); ctx.stroke(); ctx.restore(); ctx.globalAlpha = 1;
+        }
+
+        (a.liquidity?.sweeps || []).forEach((s, idx) => {
+          const barIdx = visibleBars().findIndex(b => b.isoTime === s.at);
+          if (barIdx < 0) return;
+          const x = xForIndex(barIdx), y = yForPrice(s.level);
+          const color = s.type.includes('buy') ? '#fb7185' : '#34d399';
+          ctx.fillStyle = color;
+          ctx.beginPath(); ctx.moveTo(x, y - 10); ctx.lineTo(x - 7, y + 2); ctx.lineTo(x + 7, y + 2); ctx.closePath(); ctx.fill();
+          drawTinyText(x + 8, y - 10 - (idx % 2) * 12, s.type.includes('buy') ? 'BS sweep' : 'SS sweep', color);
+        });
+      }
+
+      drawPanel();
+    }
+
+    function drawPanel() {
+      const a = DATA.analysis;
+      if (!a) return;
+      const x = PRICE_AXIS_X - 292, y = M.top + 10, w = 272, h = 136;
+      ctx.fillStyle = 'rgba(15,23,42,0.84)';
+      ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+      roundRect(ctx, x, y, w, h, 10, true, true);
+      drawText(x + 12, y + 22, 'Analysis Overlay', '#e5e7eb', 13, 800);
+      drawText(x + 12, y + 44, 'Bias: ' + (a.intraday?.bias || 'n/a'), '#93c5fd');
+      drawText(x + 12, y + 64, 'Trend 4H: ' + (a.trend4h?.trend || 'n/a'), '#c4b5fd');
+      drawText(x + 12, y + 84, 'Mode: ' + (a.structure5m?.mode || 'n/a'), '#fcd34d');
+      drawText(x + 12, y + 104, 'Best setup: ' + (a.plans?.[0]?.side || 'n/a').toUpperCase() + ' (' + (a.plans?.[0]?.score ?? 'n/a') + '/100)', '#86efac');
+      drawText(x + 12, y + 124, 'Session: ' + (a.intraday?.session?.session || 'n/a') + ' / Regime: ' + (a.regime?.regime || 'n/a'), '#cbd5e1', 11);
+    }
+
+    function updateHoverBox(b, price) {
+      document.getElementById('hover-time').textContent = b ? b.isoTime : '-';
+      document.getElementById('hover-ohlc').textContent = b ? ('O ' + fmt(b.open) + ' • H ' + fmt(b.high) + ' • L ' + fmt(b.low) + ' • C ' + fmt(b.close)) : '-';
+      document.getElementById('hover-volume').textContent = b ? fmt(b.volume || 0, 0) : '-';
+      document.getElementById('hover-price').textContent = Number.isFinite(price) ? fmt(price) : '-';
+    }
+
+    function drawCrosshair() {
+      if (!state.showCrosshair || state.hoverX == null || state.hoverY == null) { updateHoverBox(null, null); return; }
+      const x = state.hoverX, y = state.hoverY;
+      ctx.save(); ctx.strokeStyle = 'rgba(148,163,184,.45)'; ctx.setLineDash([4,4]); ctx.lineWidth = 1;
+      if (isInPlot(x, y)) {
+        ctx.beginPath(); ctx.moveTo(M.left, y); ctx.lineTo(PRICE_AXIS_X, y); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x, M.top); ctx.lineTo(x, M.top + PLOT_H); ctx.stroke();
+        const bars = visibleBars();
+        const slot = PLOT_W / state.count;
+        const i = clamp(Math.floor((x - M.left) / slot), 0, bars.length - 1);
+        const b = bars[i];
+        const price = state.yMax - ((y - M.top) / PLOT_H) * (state.yMax - state.yMin);
+        drawLabel(x + 10, M.top + 18, b.isoTime + ' | O ' + fmt(b.open) + ' H ' + fmt(b.high) + ' L ' + fmt(b.low) + ' C ' + fmt(b.close), '#cbd5e1', 'rgba(15,23,42,.95)');
+        drawLabel(PRICE_AXIS_X + 8, y + 4, fmt(price), '#fff', '#334155');
+        updateHoverBox(b, price);
+      } else {
+        updateHoverBox(null, null);
+      }
+      ctx.restore();
+    }
+
+    function drawLatestPrice() {
+      const bars = visibleBars();
+      const last = bars[bars.length - 1];
+      const y = yForPrice(last.close);
+      const color = last.close >= last.open ? '#16c784' : '#ea3943';
+      ctx.save(); ctx.setLineDash([6,6]); ctx.strokeStyle = color; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(M.left, y); ctx.lineTo(PRICE_AXIS_X, y); ctx.stroke(); ctx.restore();
+      ctx.fillStyle = color; roundRect(ctx, PRICE_AXIS_X + 8, y - 12, 84, 24, 5, true, false);
+      drawText(PRICE_AXIS_X + 24, y + 5, fmt(last.close), '#fff', 12, 700);
+    }
+
+    function drawText(x, y, txt, color = '#fff', size = 12, weight = 500) {
+      ctx.fillStyle = color; ctx.font = String(weight) + ' ' + String(size) + 'px Inter, system-ui, sans-serif'; ctx.fillText(txt, x, y);
+    }
+    function drawTinyText(x, y, txt, color) { drawText(x, y, txt, color, 10, 700); }
+    function drawLabel(x, y, txt, color, bg) {
+      ctx.font = '700 11px Inter, system-ui, sans-serif';
+      const w = ctx.measureText(txt).width + 10;
+      ctx.fillStyle = bg; roundRect(ctx, x - 4, y - 12, w, 18, 5, true, false);
+      ctx.fillStyle = color; ctx.fillText(txt, x, y + 1);
+    }
+    function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+      const rr = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + rr, y);
+      ctx.arcTo(x + w, y, x + w, y + h, rr);
+      ctx.arcTo(x + w, y + h, x, y + h, rr);
+      ctx.arcTo(x, y + h, x, y, rr);
+      ctx.arcTo(x, y, x + w, y, rr);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    function render() {
+      ensureYRange();
+      ctx.clearRect(0, 0, CSS_WIDTH, CSS_HEIGHT);
+      drawGrid();
+      drawCandles();
+      drawOverlay();
+      drawLatestPrice();
+      drawCrosshair();
+      updateStats();
+    }
+
+    function zoomX(direction, anchorX) {
+      const oldCount = state.count;
+      const nextCount = clamp(Math.round(state.count * (direction > 0 ? 0.88 : 1.14)), 30, DATA.bars.length);
+      const barsBefore = clamp((anchorX - M.left) / PLOT_W, 0, 1) * oldCount;
+      const anchorIndex = state.start + barsBefore;
+      state.count = nextCount;
+      state.start = Math.round(anchorIndex - (barsBefore / oldCount) * nextCount);
+      state.start = clamp(state.start, 0, Math.max(0, DATA.bars.length - state.count));
+      fitY(); render();
+    }
+
+    function zoomY(direction, anchorY) {
+      const factor = direction > 0 ? 0.92 : 1.09;
+      const priceAtAnchor = state.yMax - ((anchorY - M.top) / PLOT_H) * (state.yMax - state.yMin);
+      const newRange = (state.yMax - state.yMin) * factor;
+      const anchorRatio = (anchorY - M.top) / PLOT_H;
+      state.yMax = priceAtAnchor + newRange * anchorRatio;
+      state.yMin = priceAtAnchor - newRange * (1 - anchorRatio);
+      render();
+    }
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (CSS_WIDTH / rect.width);
+      const y = (e.clientY - rect.top) * (CSS_HEIGHT / rect.height);
+      if (isInPriceAxis(x, y)) zoomY(e.deltaY < 0 ? 1 : -1, y);
+      else if (isInPlot(x, y)) zoomX(e.deltaY < 0 ? 1 : -1, x);
+    }, { passive: false });
+
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (CSS_WIDTH / rect.width);
+      const y = (e.clientY - rect.top) * (CSS_HEIGHT / rect.height);
+      if (!isInPlot(x, y)) return;
+      state.dragging = true; state.dragX = x; state.dragStart = state.start;
+    });
+    window.addEventListener('mouseup', () => state.dragging = false);
+    window.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (CSS_WIDTH / rect.width);
+      const y = (e.clientY - rect.top) * (CSS_HEIGHT / rect.height);
+      state.hoverX = x; state.hoverY = y; state.showCrosshair = true;
+      if (state.dragging) {
+        const dx = x - state.dragX;
+        const barsShift = Math.round(-(dx / PLOT_W) * state.count);
+        state.start = clamp(state.dragStart + barsShift, 0, Math.max(0, DATA.bars.length - state.count));
+        fitY();
+      }
+      render();
+    });
+    canvas.addEventListener('mouseleave', () => { state.showCrosshair = false; render(); });
+    canvas.addEventListener('dblclick', () => { state.start = Math.max(0, DATA.bars.length - Math.min(DATA.bars.length, 120)); state.count = Math.min(DATA.bars.length, 120); fitY(); render(); });
+
+    document.getElementById('btn-reset').onclick = () => { state.start = Math.max(0, DATA.bars.length - Math.min(DATA.bars.length, 120)); state.count = Math.min(DATA.bars.length, 120); fitY(); render(); };
+    document.getElementById('btn-fit-y').onclick = () => { fitY(); render(); };
+    document.getElementById('btn-more').onclick = () => { state.count = clamp(Math.round(state.count * 1.2), 30, DATA.bars.length); state.start = clamp(state.start - 10, 0, Math.max(0, DATA.bars.length - state.count)); fitY(); render(); };
+    document.getElementById('btn-less').onclick = () => { state.count = clamp(Math.round(state.count * 0.82), 30, DATA.bars.length); state.start = clamp(state.start, 0, Math.max(0, DATA.bars.length - state.count)); fitY(); render(); };
+
+    function bindToggle(id, key) {
+      const el = document.getElementById(id);
+      el.onclick = () => {
+        state.layers[key] = !state.layers[key];
+        el.classList.toggle('active', state.layers[key]);
+        render();
+      };
+    }
+    bindToggle('toggle-levels', 'levels');
+    bindToggle('toggle-zones', 'zones');
+    bindToggle('toggle-structure', 'structure');
+    bindToggle('toggle-liquidity', 'liquidity');
+
+    fitY();
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>XAUUSD Dashboard</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2b;
+      --panel2: #182237;
+      --border: #25314d;
+      --text: #e7edf8;
+      --muted: #95a3be;
+      --accent: #7aa2f7;
+      --good: #16c784;
+      --mid: #f5a524;
+      --bad: #ea3943;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#0b1020,#0d1326);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif}
+    .wrap{max-width:1500px;margin:0 auto;padding:24px}
+    .hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:18px}
+    h1{margin:0;font-size:30px}
+    .muted{color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 10px 28px rgba(0,0,0,.22)}
+    .kpi{grid-column:span 3}
+    .big{font-size:26px;font-weight:800;margin-top:6px}
+    .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+    .report{grid-column:span 5}
+    .liquidity{grid-column:span 3}
+    .links{grid-column:span 4}
+    .plans{grid-column:span 12}
+    .plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+    table{width:100%;border-collapse:collapse;margin-top:10px;background:#0f1728;border-radius:14px;overflow:hidden}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--border);text-align:left}
+    th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+    .plan{background:var(--panel2);border:1px solid var(--border);border-radius:16px;padding:14px}
+    .plan-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .plan-title{font-weight:800}
+    .score{padding:4px 10px;border-radius:999px;font-weight:800;font-size:12px}
+    .score.good{background:rgba(22,199,132,.14);color:#68f0b6}
+    .score.mid{background:rgba(245,165,36,.14);color:#ffcc70}
+    .score.bad{background:rgba(234,57,67,.14);color:#ff8b93}
+    .rows{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-bottom:10px}
+    .rows div{display:flex;flex-direction:column;background:#0f1728;border-radius:12px;padding:10px}
+    .rows b{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+    pre{white-space:pre-wrap;word-break:break-word;background:#0f1728;border:1px solid var(--border);padding:14px;border-radius:14px;max-height:500px;overflow:auto}
+    ul{margin:8px 0 0 18px;padding:0}
+    a{color:#9ac1ff;text-decoration:none}
+    a:hover{text-decoration:underline}
+    iframe{width:100%;height:560px;border:1px solid var(--border);border-radius:14px;background:#0f1728}
+    .full{grid-column:span 12}
+    @media (max-width:1100px){.kpi,.report,.liquidity,.links{grid-column:span 12}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1>XAUUSD Visual Dashboard</h1>
+        <div class="muted">Human-friendly output from crawler + analysis engine + candle renderer</div>
+      </div>
+      <div class="muted">Updated: 2026-03-23T06:54:43.915Z</div>
+    </div>
+
+    <div class="grid">
+      <div class="card kpi"><div class="label">Bias</div><div class="big">sell_rally</div><div class="muted">Session: london</div></div>
+      <div class="card kpi"><div class="label">Regime</div><div class="big">volatile</div><div class="muted">Mode: swing</div></div>
+      <div class="card kpi"><div class="label">Current Price</div><div class="big">4221.49</div><div class="muted">Near S/R: 4182.44 / 4230.11</div></div>
+      <div class="card kpi"><div class="label">Best Setup</div><div class="big">SHORT</div><div class="muted">Score: 100/100</div></div>
+      <div class="card kpi"><div class="label">7D Backtest</div><div class="big">66.7%</div><div class="muted">Total R: 4.08</div></div>
+
+      <div class="card report">
+        <div class="label">Report</div>
+        <pre>GOLD REPORT V2 - OANDA:XAUUSD
+Data time: 2026-03-23T06:54:43.915Z
+
+1) HTF structure
+- 4H trend: giảm
+- Confidence: 82%
+- 4H structure state: bearish
+- BOS: none
+- CHoCH: none
+
+2) Intraday engine
+- Bias: sell_rally
+- Session: london
+- Regime: volatile
+- Last price: 4221.49
+- Near support/resistance: 4182.44 / 4230.11
+- Major support/resistance: 4163.07 / 4531.27
+
+3) Darvas / range / swing
+- Mode: swing
+- Box high/low: 4380.15 / 4163.07
+- Range: 217.09 (5.05%)
+- Touches top/bottom: 4 / 1
+- Note: 5m đang vận động định hướng, ưu tiên theo intraday swing/trend.
+
+4) Liquidity map
+- Buy liquidity: 4163.07, 4163.07, 4182.44
+- Sell liquidity: 4230.11, 4382.22, 4531.27
+- Equal highs: 4378.29~4379.57
+- Equal lows: none
+- Sweeps: buy_side_sweep@4296.21, buy_side_sweep@4296.21, buy_side_sweep@4230.11, sell_side_sweep@4182.44
+- Volume proxy prices: 4236.59, 4231.17, 4203.13, 4192.10, 4218.49
+
+5) Ranked trade plans
+- SHORT (intraday) score 100/100 | zone 4230.11 - 4531.27
+  note: Canh sell khi giá hồi vào kháng cự gần, ưu tiên sau false break / rejection / buy-side sweep.
+  invalidation: 4553.62
+  TP1: 4182.44
+  TP2: 4163.07
+
+6) Executive summary
+- Priority: sell rally
+- Best setup: SHORT score 100/100
+- Intraday strategy: Canh sell khi giá hồi vào kháng cự gần, ưu tiên sau false break / rejection / buy-side sweep.
+</pre>
+      </div>
+
+      <div class="card liquidity">
+        <div class="label">Liquidity Map</div>
+        <div class="rows" style="grid-template-columns:1fr; margin-top:10px;">
+          <div><b>Buy liquidity</b><span>4163.07, 4163.07, 4182.44</span></div>
+          <div><b>Sell liquidity</b><span>4230.11, 4382.22, 4531.27</span></div>
+          <div><b>Equal highs</b><span>4378.29 ~ 4379.57</span></div>
+          <div><b>Equal lows</b><span>none</span></div>
+        </div>
+        <div style="margin-top:12px"><b class="label" style="display:block;margin-bottom:6px">Sweeps</b><ul><li>buy_side_sweep @ <b>4296.21</b> <span class="muted">2026-03-23T06:00:00.000Z</span></li><li>buy_side_sweep @ <b>4296.21</b> <span class="muted">2026-03-23T06:15:00.000Z</span></li><li>buy_side_sweep @ <b>4230.11</b> <span class="muted">2026-03-23T06:40:00.000Z</span></li><li>sell_side_sweep @ <b>4182.44</b> <span class="muted">2026-03-23T06:45:00.000Z</span></li></ul></div>
+      </div>
+
+      <div class="card links">
+        <div class="label">Files</div>
+        <ul>
+          <li><a href="./xauusd_5m.html">Open 5m chart</a></li>
+          <li><a href="./xauusd_4h.html">Open 4H chart</a></li>
+          <li><a href="../reports/xauusd_report.txt">Open text report</a></li>
+          <li><a href="../reports/xauusd_analysis.json">Open analysis JSON</a></li>
+          <li><a href="../backtest/xauusd_backtest_7d.txt">Open backtest summary</a></li>
+          <li><a href="../backtest/xauusd_backtest_7d.json">Open backtest JSON</a></li>
+          <li><a href="../tradingview/OANDA_XAUUSD_combined.json">Open raw combined JSON</a></li>
+        </ul>
+        <p class="muted">Bot can read JSON. Human can read this dashboard + charts.</p>
+      </div>
+
+      <div class="card plans full">
+        <div class="label">Ranked Trade Plans</div>
+        <div class="plans-grid">
+    <div class="plan">
+      <div class="plan-head">
+        <div class="plan-title">SHORT <span class="muted">(intraday)</span></div>
+        <div class="score good">100/100</div>
+      </div>
+      <div class="rows">
+        <div><b>Zone</b><span>4230.11 - 4531.27</span></div>
+        <div><b>Invalidation</b><span>4553.62</span></div>
+        <div><b>TP1</b><span>4182.44</span></div>
+        <div><b>TP2</b><span>4163.07</span></div>
+      </div>
+      <p>Canh sell khi giá hồi vào kháng cự gần, ưu tiên sau false break / rejection / buy-side sweep.</p>
+    </div>
+  </div>
+      </div>
+
+      <div class="card full">
+        <div class="label">7D Backtest Check</div>
+        
+          <div class="rows" style="grid-template-columns:repeat(4,1fr); margin-top:10px;">
+            <div><b>Trades</b><span>6</span></div>
+            <div><b>Profitable days</b><span>4</span></div>
+            <div><b>Avg R</b><span>0.68</span></div>
+            <div><b>Verdict</b><span>Rule gợi ý này có edge dương trong sample 7 ngày gần nhất.</span></div>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Day</th><th>Side</th><th>Status</th><th>Entered</th><th>Profitable</th><th>R</th><th>Bias</th><th>Regime</th></tr>
+            </thead>
+            <tbody>
+    <tr>
+      <td>2026-03-16</td>
+      <td>SHORT</td>
+      <td>stop</td>
+      <td>yes</td>
+      <td>no</td>
+      <td>-1.00</td>
+      <td>sell_rally</td>
+      <td>volatile</td>
+    </tr>
+  
+    <tr>
+      <td>2026-03-17</td>
+      <td>LONG</td>
+      <td>eod</td>
+      <td>yes</td>
+      <td>no</td>
+      <td>-0.11</td>
+      <td>buy_dip</td>
+      <td>mean-reverting</td>
+    </tr>
+  
+    <tr>
+      <td>2026-03-18</td>
+      <td>SHORT</td>
+      <td>tp2</td>
+      <td>yes</td>
+      <td>yes</td>
+      <td>0.88</td>
+      <td>bearish</td>
+      <td>compression</td>
+    </tr>
+  
+    <tr>
+      <td>2026-03-19</td>
+      <td>SHORT</td>
+      <td>tp2</td>
+      <td>yes</td>
+      <td>yes</td>
+      <td>0.29</td>
+      <td>bearish</td>
+      <td>volatile</td>
+    </tr>
+  
+    <tr>
+      <td>2026-03-20</td>
+      <td>N/A</td>
+      <td>no-directional-plan</td>
+      <td>no</td>
+      <td>no</td>
+      <td>n/a</td>
+      <td>n/a</td>
+      <td>n/a</td>
+    </tr>
+  
+    <tr>
+      <td>2026-03-22</td>
+      <td>SHORT</td>
+      <td>eod</td>
+      <td>yes</td>
+      <td>yes</td>
+      <td>1.83</td>
+      <td>bearish</td>
+      <td>trend</td>
+    </tr>
+  
+    <tr>
+      <td>2026-03-23</td>
+      <td>SHORT</td>
+      <td>tp2</td>
+      <td>yes</td>
+      <td>yes</td>
+      <td>2.20</td>
+      <td>sell_rally</td>
+      <td>volatile</td>
+    </tr>
+  </tbody>
+          </table>
+        
+      </div>
+
+      <div class="card full">
+        <div class="label">5m Chart Preview</div>
+        <iframe src="./xauusd_5m.html" title="5m chart"></iframe>
+      </div>
+
+      <div class="card full">
+        <div class="label">4H Chart Preview</div>
+        <iframe src="./xauusd_4h.html" title="4H chart"></iframe>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

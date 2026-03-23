@@ -1,0 +1,268 @@
+{
+  "meta": {
+    "symbol": "OANDA:XAUUSD",
+    "source": "TradingView websocket",
+    "fetchedAt": "2026-03-23T06:54:43.915Z"
+  },
+  "trend4h": {
+    "trend": "giảm",
+    "confidence": 0.8233745652823077,
+    "swings": [
+      {
+        "kind": "high",
+        "index": 0,
+        "price": 5011.905,
+        "timestamp": 1773738000,
+        "isoTime": "2026-03-17T09:00:00.000Z"
+      },
+      {
+        "kind": "low",
+        "index": 12,
+        "price": 4531.275,
+        "timestamp": 1773910800,
+        "isoTime": "2026-03-19T09:00:00.000Z"
+      },
+      {
+        "kind": "high",
+        "index": 16,
+        "price": 4736.175,
+        "timestamp": 1773968400,
+        "isoTime": "2026-03-20T01:00:00.000Z"
+      },
+      {
+        "kind": "low",
+        "index": 23,
+        "price": 4163.07,
+        "timestamp": 1774242000,
+        "isoTime": "2026-03-23T05:00:00.000Z"
+      }
+    ],
+    "threshold": 94.90560000000005,
+    "atr": 118.63200000000006,
+    "structure": {
+      "structure": "bearish",
+      "bos": null,
+      "choch": null,
+      "lastHigh": 4736.175,
+      "prevHigh": 5011.905,
+      "lastLow": 4163.07,
+      "prevLow": 4531.275
+    }
+  },
+  "regime": {
+    "regime": "volatile",
+    "efficiency": 0.5887748117727557,
+    "m5Atr": 31.922499999999854,
+    "h1Atr": 79.10400000000008,
+    "m5Range": 219.15000000000055,
+    "h1Range": 532.6350000000002
+  },
+  "intraday": {
+    "bias": "sell_rally",
+    "volumeState": "active",
+    "session": {
+      "session": "london",
+      "hourUtc": 6
+    },
+    "h1Structure": {
+      "structure": "range",
+      "bos": null,
+      "choch": null,
+      "lastHigh": 4678.445,
+      "lastLow": 4163.07
+    },
+    "m5Structure": {
+      "structure": "bearish",
+      "bos": null,
+      "choch": null,
+      "lastHigh": 4230.11,
+      "prevHigh": 4296.21,
+      "lastLow": 4182.435,
+      "prevLow": 4270.06
+    },
+    "lastPrice": 4221.495,
+    "avgVolume5m": 8145.111111111111,
+    "lastVolume5m": 12841,
+    "intradayHigh": 4382.22,
+    "intradayLow": 4163.07,
+    "distanceToSupport": 39.05999999999949,
+    "distanceToResistance": 8.614999999999782
+  },
+  "structure5m": {
+    "mode": "swing",
+    "box": {
+      "high": 4380.155,
+      "low": 4163.07,
+      "range": 217.08500000000004,
+      "rangePct": 5.047016814574123,
+      "touchesTop": 4,
+      "touchesBottom": 1
+    },
+    "note": "5m đang vận động định hướng, ưu tiên theo intraday swing/trend."
+  },
+  "levels": {
+    "currentPrice": 4221.495,
+    "supportNear": 4182.435,
+    "resistanceNear": 4230.11,
+    "supportMajor": 4163.07,
+    "resistanceMajor": 4531.275,
+    "h4RangeLow": 4163.07,
+    "h4RangeHigh": 4736.175,
+    "h1RangeLow": 4163.07,
+    "h1RangeHigh": 4695.705,
+    "m5RangeLow": 4163.07,
+    "m5RangeHigh": 4382.22,
+    "h1Swings": [
+      {
+        "kind": "high",
+        "index": 0,
+        "price": 4678.445,
+        "timestamp": 1774008000,
+        "isoTime": "2026-03-20T12:00:00.000Z"
+      },
+      {
+        "kind": "low",
+        "index": 17,
+        "price": 4163.07,
+        "timestamp": 1774245600,
+        "isoTime": "2026-03-23T06:00:00.000Z"
+      }
+    ],
+    "m5Swings": [
+      {
+        "kind": "low",
+        "index": 0,
+        "price": 4352.99,
+        "timestamp": 1774238100,
+        "isoTime": "2026-03-23T03:55:00.000Z"
+      },
+      {
+        "kind": "high",
+        "index": 9,
+        "price": 4378.29,
+        "timestamp": 1774240800,
+        "isoTime": "2026-03-23T04:40:00.000Z"
+      },
+      {
+        "kind": "low",
+        "index": 11,
+        "price": 4349.91,
+        "timestamp": 1774241400,
+        "isoTime": "2026-03-23T04:50:00.000Z"
+      },
+      {
+        "kind": "high",
+        "index": 14,
+        "price": 4379.57,
+        "timestamp": 1774242300,
+        "isoTime": "2026-03-23T05:05:00.000Z"
+      },
+      {
+        "kind": "low",
+        "index": 26,
+        "price": 4270.06,
+        "timestamp": 1774245900,
+        "isoTime": "2026-03-23T06:05:00.000Z"
+      },
+      {
+        "kind": "high",
+        "index": 27,
+        "price": 4296.21,
+        "timestamp": 1774246200,
+        "isoTime": "2026-03-23T06:10:00.000Z"
+      },
+      {
+        "kind": "low",
+        "index": 33,
+        "price": 4182.435,
+        "timestamp": 1774248000,
+        "isoTime": "2026-03-23T06:40:00.000Z"
+      },
+      {
+        "kind": "high",
+        "index": 35,
+        "price": 4230.11,
+        "timestamp": 1774248600,
+        "isoTime": "2026-03-23T06:50:00.000Z"
+      }
+    ]
+  },
+  "liquidity": {
+    "highVolumePrices": [
+      4277.276666666668,
+      4291.428333333333,
+      4255.251666666666,
+      4236.59,
+      4231.171666666666,
+      4203.131666666667,
+      4192.096666666667,
+      4218.489999999999
+    ],
+    "dayReactionLow": 4163.07,
+    "dayReactionHigh": 4382.22,
+    "h1Low": 4163.07,
+    "h1High": 4695.705,
+    "buyLiquidity": [
+      4163.07,
+      4163.07,
+      4182.435
+    ],
+    "sellLiquidity": [
+      4230.11,
+      4382.22,
+      4531.275
+    ],
+    "equalHighs": [
+      [
+        4378.29,
+        4379.57
+      ]
+    ],
+    "equalLows": [],
+    "sweeps": [
+      {
+        "type": "buy_side_sweep",
+        "level": 4296.21,
+        "at": "2026-03-23T06:00:00.000Z",
+        "close": 4286.4
+      },
+      {
+        "type": "buy_side_sweep",
+        "level": 4296.21,
+        "at": "2026-03-23T06:15:00.000Z",
+        "close": 4285.955
+      },
+      {
+        "type": "buy_side_sweep",
+        "level": 4230.11,
+        "at": "2026-03-23T06:40:00.000Z",
+        "close": 4182.97
+      },
+      {
+        "type": "sell_side_sweep",
+        "level": 4182.435,
+        "at": "2026-03-23T06:45:00.000Z",
+        "close": 4206.595
+      }
+    ]
+  },
+  "plans": [
+    {
+      "side": "short",
+      "style": "intraday",
+      "zone": [
+        4230.11,
+        4531.275
+      ],
+      "invalidation": 4553.620749999999,
+      "target1": 4182.435,
+      "target2": 4163.07,
+      "note": "Canh sell khi giá hồi vào kháng cự gần, ưu tiên sau false break / rejection / buy-side sweep.",
+      "score": 100
+    }
+  ],
+  "limitations": [
+    "Volume từ OANDA/TradingView là activity proxy, không phải futures centralized volume.",
+    "BOS/CHoCH, equal highs/lows, liquidity sweeps và Darvas là rule-based engine, không phải order-flow thực."
+  ]
+}

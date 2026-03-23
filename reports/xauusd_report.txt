@@ -1,0 +1,44 @@
+GOLD REPORT V2 - OANDA:XAUUSD
+Data time: 2026-03-23T06:54:43.915Z
+
+1) HTF structure
+- 4H trend: giảm
+- Confidence: 82%
+- 4H structure state: bearish
+- BOS: none
+- CHoCH: none
+
+2) Intraday engine
+- Bias: sell_rally
+- Session: london
+- Regime: volatile
+- Last price: 4221.49
+- Near support/resistance: 4182.44 / 4230.11
+- Major support/resistance: 4163.07 / 4531.27
+
+3) Darvas / range / swing
+- Mode: swing
+- Box high/low: 4380.15 / 4163.07
+- Range: 217.09 (5.05%)
+- Touches top/bottom: 4 / 1
+- Note: 5m đang vận động định hướng, ưu tiên theo intraday swing/trend.
+
+4) Liquidity map
+- Buy liquidity: 4163.07, 4163.07, 4182.44
+- Sell liquidity: 4230.11, 4382.22, 4531.27
+- Equal highs: 4378.29~4379.57
+- Equal lows: none
+- Sweeps: buy_side_sweep@4296.21, buy_side_sweep@4296.21, buy_side_sweep@4230.11, sell_side_sweep@4182.44
+- Volume proxy prices: 4236.59, 4231.17, 4203.13, 4192.10, 4218.49
+
+5) Ranked trade plans
+- SHORT (intraday) score 100/100 | zone 4230.11 - 4531.27
+  note: Canh sell khi giá hồi vào kháng cự gần, ưu tiên sau false break / rejection / buy-side sweep.
+  invalidation: 4553.62
+  TP1: 4182.44
+  TP2: 4163.07
+
+6) Executive summary
+- Priority: sell rally
+- Best setup: SHORT score 100/100
+- Intraday strategy: Canh sell khi giá hồi vào kháng cự gần, ưu tiên sau false break / rejection / buy-side sweep.
